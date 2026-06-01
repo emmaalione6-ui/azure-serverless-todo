@@ -1,0 +1,12 @@
+{
+  "name": "serverlessapp",
+  "version": "1.0.0",
+  "description": "Serverless Todo App",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.9.3"
+  }
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azure Todo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #newtodo {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    #newtodo:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    #addBtn {
+      padding: 12px 25px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    #addBtn:hover {
+      background: #764ba2;
+    }
+    h2 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    #list {
+      list-style: none;
+    }
+    #list li {
+      background: #f5f5f5;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #list li:hover {
+      background: #efefef;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 My Todos</h1>
+    <div class="input-group">
+      <input type="text" id="newtodo" placeholder="Add a new todo...">
+      <button id="addBtn">Add</button>
+    </div>
+    <h2>Your Tasks:</h2>
+    <ul id="list"></ul>
+  </div>
+
+  <script>
+    const API = "https://func-todo-api-emmaali50.azurewebsites.net/api";
+    const USER = "demo";
+
+    async function loadTodos() {
+      try {
+        const res = await fetch(`${API}/GetTodos?userId=${USER}`);
+        const todos = await res.json();
+        const ul = document.getElementById("list");
+        ul.innerHTML = "";
+        todos.forEach(t => {
+          const li = document.createElement("li");
+          li.textContent = t.title;
+          ul.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error loading todos:", error);
+        alert("Failed to load todos. Check console for details.");
+      }
+    }
+
+    async function addTodo() {
+      const title = document.getElementById("newtodo").value;
+      if (!title.trim()) {
+        alert("Please enter a todo");
+        return;
+      }
+      try {
+        await fetch(`${API}/CreateTodo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, userId: USER, id: Date.now().toString() })
+        });
+        document.getElementById("newtodo").value = "";
+        loadTodos();
+      } catch (error) {
+        console.error("Error adding todo:", error);
+        alert("Failed to add todo. Check console for details.");
+      }
+    }
+
+    document.getElementById("addBtn").addEventListener("click", addTodo);
+    document.getElementById("newtodo").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") addTodo();
+    });
+
+    loadTodos();
+  </script>
+</body>
+</html>
