@@ -20,7 +20,7 @@ app.http('GetTodos', {
   handler: async (request, context) => {
     try {
       const c = await getContainer();
-      const userId = request.query.get('userId') || 'default';
+      const userId = request.query.userId || 'default';
       
       const { resources } = await c.items
         .query({

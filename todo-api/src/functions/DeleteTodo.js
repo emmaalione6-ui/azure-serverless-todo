@@ -20,9 +20,8 @@ app.http('DeleteTodo', {
   handler: async (request, context) => {
     try {
       const c = await getContainer();
-      const params = new URL(request.url).searchParams;
-      const id = params.get('id');
-      const userId = params.get('userId');
+      const id = request.query.id;
+      const userId = request.query.userId;
       
       if (!id) {
         return { status: 400, jsonBody: { error: 'id query parameter is required' } };

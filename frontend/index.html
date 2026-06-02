@@ -79,9 +79,46 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background 0.2s;
     }
     #list li:hover {
       background: #efefef;
+    }
+    #list li.completed {
+      background: #e8f5e9;
+      text-decoration: line-through;
+      color: #999;
+    }
+    .todo-content {
+      flex: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+    .todo-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .todo-actions button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .complete-btn {
+      background: #4caf50;
+      color: white;
+    }
+    .complete-btn:hover {
+      background: #45a049;
+    }
+    .delete-btn {
+      background: #f44336;
+      color: white;
+    }
+    .delete-btn:hover {
+      background: #da190b;
     }
   </style>
 </head>
@@ -97,23 +134,86 @@
   </div>
 
   <script>
-    const API = "https://func-todo-api-emmaali50.azurewebsites.net/api";
+    // Use local Functions host during development (file:// or localhost),
+    // otherwise use the deployed Function App URL.
     const USER = "demo";
+    const API = (function() {
+      if (location.protocol === 'file:' || location.hostname === 'localhost') {
+        return 'http://localhost:7071/api';
+      }
+      return 'https://func-todo-api-emmaali50.azurewebsites.net/api';
+    })();
 
     async function loadTodos() {
       try {
         const res = await fetch(`${API}/GetTodos?userId=${USER}`);
-        const todos = await res.json();
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+        }
+        // Some error responses may be empty or non-JSON; guard parsing.
+        const text = await res.text();
+        const todos = text ? JSON.parse(text) : [];
         const ul = document.getElementById("list");
         ul.innerHTML = "";
         todos.forEach(t => {
           const li = document.createElement("li");
-          li.textContent = t.title;
+          if (t.completed) li.classList.add("completed");
+          
+          const content = document.createElement("div");
+          content.className = "todo-content";
+          content.textContent = t.title;
+          content.onclick = () => toggleComplete(t.id, t.completed);
+          li.appendChild(content);
+          
+          const actions = document.createElement("div");
+          actions.className = "todo-actions";
+          
+          const completeBtn = document.createElement("button");
+          completeBtn.className = "complete-btn";
+          completeBtn.textContent = t.completed ? "Undo" : "Complete";
+          completeBtn.onclick = () => toggleComplete(t.id, t.completed);
+          actions.appendChild(completeBtn);
+          
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-btn";
+          deleteBtn.textContent = "Delete";
+          deleteBtn.onclick = () => deleteTodo(t.id);
+          actions.appendChild(deleteBtn);
+          
+          li.appendChild(actions);
           ul.appendChild(li);
         });
       } catch (error) {
         console.error("Error loading todos:", error);
         alert("Failed to load todos. Check console for details.");
+      }
+    }
+
+    async function toggleComplete(id, currentCompleted) {
+      try {
+        await fetch(`${API}/UpdateTodo?id=${id}&userId=${USER}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: USER, completed: !currentCompleted })
+        });
+        loadTodos();
+      } catch (error) {
+        console.error("Error updating todo:", error);
+        alert("Failed to update todo. Check console for details.");
+      }
+    }
+
+    async function deleteTodo(id) {
+      if (!confirm("Delete this todo?")) return;
+      try {
+        await fetch(`${API}/DeleteTodo?id=${id}&userId=${USER}`, {
+          method: "DELETE"
+        });
+        loadTodos();
+      } catch (error) {
+        console.error("Error deleting todo:", error);
+        alert("Failed to delete todo. Check console for details.");
       }
     }
 

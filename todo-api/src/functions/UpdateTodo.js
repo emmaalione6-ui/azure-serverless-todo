@@ -20,7 +20,7 @@ app.http('UpdateTodo', {
   handler: async (request, context) => {
     try {
       const c = await getContainer();
-      const id = new URL(request.url).searchParams.get('id');
+      const id = request.query.id;
       const body = await request.json();
       
       if (!id) {
