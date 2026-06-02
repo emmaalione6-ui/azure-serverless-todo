@@ -11,7 +11,7 @@ Serverless REST API and frontend for managing Todo items, built with Azure Funct
 
 ## 🌐 Live Demo
 
-[View Live App](https://your-static-web-app-url.azurestaticapps.net) | [View API Endpoint](https://func-todo-api-emmaal60.azurewebsites.net/api/GetTodos?userId=demo)
+[View Live App](https://agreeable-sea-00c7f720f.7.azurestaticapps.net/) | [View API Endpoint](https://func-todo-api-emmaal60.azurewebsites.net/api/GetTodos?userId=demo)
 
 > **Note:** The Cosmos DB is on the serverless free tier — the first request may take 2–3 seconds to cold-start.
 
